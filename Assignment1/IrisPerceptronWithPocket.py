@@ -3,7 +3,7 @@ Kevin Rush
 10052650
 11kr28
 
-This is my iris perceptron for assignment 1 Part A (No Pocket) in COGS 400 2020
+This is my iris perceptron for assignment 1 Part B (Pocket) in COGS 400 2020
 """
 
 import numpy as np
@@ -13,7 +13,7 @@ class Perceptron():                     #Creating the perceptron class
     def __init__(self):                 #initialize perceptron properties, synaptic weights  and the learning rate
         self.synaptic_weights = 2*np.random.random((4, 1)) - 1  #random weight values to start with
         self.learning_rate = 0.01       #I chose a small learning rate because it provided the best results
-        self._pocket_synaptic_weights   #pocket weights, no values as this will be filled during training
+        self._pocket_synaptic_weights = 2*np.0 #pocket weights, initialized all to 0, they'll be updated later
 
     def organizeData(self, inputFile):  #This is a function to read in a file, put all the data into a useable input and output array
 
@@ -38,8 +38,8 @@ class Perceptron():                     #Creating the perceptron class
         return training_inputs, training_outputs        #return useable arrays
 
 
-    def dotProduct(self, array):                    #calcualte the dot product of an array with the synaptic weights 
-        if len(array) != len(self.synaptic_weights):    #just a check to make sure the arrays are compatable 
+    def dotProduct(self, array1, array2):                    #calcualte the dot product of an array with the synaptic weights 
+        if len(array1) != len(array2):    #just a check to make sure the arrays are compatable 
             print("Error in Dot Product!!!!")
             return -9999999999999
         else:
