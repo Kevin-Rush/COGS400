@@ -13,7 +13,6 @@ class Perceptron():                     #Creating the perceptron class
     def __init__(self):                 #initialize perceptron properties, synaptic weights  and the learning rate
         self.input_layer_weights = 2*np.random.random((4, 1)) - 1  #random weight values to start with
         self.learning_rate = 0.01       #I chose a small learning rate because it provided the best results
-        #self.output_layer = np.array([0.2, 0.5, 0.7])
 
     def organizeData(self, inputFile):  #This is a function to read in a file, put all the data into a useable input and output array
 

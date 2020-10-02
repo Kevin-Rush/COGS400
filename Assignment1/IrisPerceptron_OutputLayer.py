@@ -3,7 +3,7 @@ Kevin Rush
 10052650
 11kr28
 
-This is my iris perceptron for assignment 1 Part B (Pocket) in COGS 400 2020
+This is my iris perceptron for assignment 1 Part A (No Pocket) in COGS 400 2020
 """
 
 import numpy as np
@@ -11,11 +11,9 @@ import numpy as np
 class Perceptron():                     #Creating the perceptron class
 
     def __init__(self):                 #initialize perceptron properties, synaptic weights  and the learning rate
-        self.synaptic_weights = 2*np.random.random((4, 1)) - 1  #random weight values to start with
+        self.input_layer_weights = 2*np.random.random((4, 1)) - 1  #random weight values to start with
         self.learning_rate = 0.01       #I chose a small learning rate because it provided the best results
-        self._pocket_synaptic_weights = np.array([self.synaptic_weights[0],self.synaptic_weights[1],
-                                            self.synaptic_weights[2],self.synaptic_weights[3],-99999], dtype=float) #pocket weights, initialized all to 0, final slot is for the number of successful runs
-
+        self.output_layer = np.array([0.2, 0.5, 0.7])
     def organizeData(self, inputFile):  #This is a function to read in a file, put all the data into a useable input and output array
 
         with open(inputFile) as f:           #read in the Data
@@ -40,13 +38,13 @@ class Perceptron():                     #Creating the perceptron class
 
 
     def dotProduct(self, array):                    #calcualte the dot product of an array with the synaptic weights 
-        if len(array) != len(self.synaptic_weights):    #just a check to make sure the arrays are compatable 
+        if len(array) != len(self.input_layer_weights):    #just a check to make sure the arrays are compatable 
             print("Error in Dot Product!!!!")
-            return -99999
+            return -9999999999999
         else:
             dot = 0
             for i in range(len(array)):
-                dot += array[i]*self.synaptic_weights[i]
+                dot += array[i]*self.input_layer_weights[i]
             return dot                              
     
     def adjust(self, error, input):             #adjusts the weights of the synaptic weight
@@ -55,38 +53,16 @@ class Perceptron():                     #Creating the perceptron class
             lower = -1                      #if the guess was higher than the actual output then the error should be negative
                             #I used the lower feature to manage the appropriate adjustments if y < D and if D < y
         for i in range(4):
-            self.synaptic_weights[i] += lower*self.learning_rate*input[i]   #update all the weights
+            self.input_layer_weights[i] += lower*self.learning_rate*input[i]   #update all the weights
 
 
     def train(self, training_inputs, training_outputs, iterations): #train our data!
-        this_run = 0
 
         for k in range(iterations):                         #iterate through the data multiple times for training
             for i in range(len(training_inputs)):           #run through each line of the training input individually
                 output = self.dotProduct(training_inputs[i])     #get an output from our think function
                 error = training_outputs[i] - output        #calculate the error
-
-                if -0.5 <= error and error <= 0.4:
-                    print("hi:")
-                    
-                    this_run += 1
-                    if this_run > self._pocket_synaptic_weights[4]:
-                        print("ho")
-                        for i in range(4):
-                            print("Pre")
-                            print(self._pocket_synaptic_weights)
-                            print(self.synaptic_weights)
-                            self._pocket_synaptic_weights[i] = self.synaptic_weights[i]
-                            print("post")
-                            print(self._pocket_synaptic_weights)
-                            print(self.synaptic_weights)
-                        self._pocket_synaptic_weights[4] = this_run                    
-                    else:
-                        self.adjust(error, training_inputs[i])      #adjust weights accordingly
-                        this_run = 0
-                        
-            for i in range(4):
-                self.synaptic_weights[i] = self._pocket_synaptic_weights[i]
+                self.adjust(error, training_inputs[i])      #adjust weights accordingly
 
     def think(self, inputs):
         output = self.dotProduct(inputs)    #use the dot product to calculate our guess
@@ -105,15 +81,15 @@ if __name__ == "__main__":
 
     perceptron = Perceptron()                   #create Perceptron object
     
-    #print("Random synaptic weights: ")          #print initial weights for monitoring purposes
-    #print(perceptron.synaptic_weights)
+    print("Random synaptic weights: ")          #print initial weights for monitoring purposes
+    print(perceptron.input_layer_weights)
     
     training_inputs, training_outputs = perceptron.organizeData("iris_train.txt")
 
     perceptron.train(training_inputs, training_outputs, 10) #train the perceptron
     
-    #print("Synaptic weights post training: ")   #print finale weights for monitroing purposes
-    #print(perceptron.synaptic_weights)
+    print("Synaptic weights post training: ")   #print finale weights for monitroing purposes
+    print(perceptron.input_layer_weights)
 
     print("Time to Guess!")
 
@@ -132,4 +108,3 @@ if __name__ == "__main__":
     
     print("Correct: "+str(correct))                 
     print("Incorrect: "+str(incorrect))
-    
