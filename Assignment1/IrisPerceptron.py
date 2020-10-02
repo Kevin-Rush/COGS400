@@ -11,8 +11,9 @@ import numpy as np
 class Perceptron():                     #Creating the perceptron class
 
     def __init__(self):                 #initialize perceptron properties, synaptic weights  and the learning rate
-        self.input_layer_weights = 2*np.random.random((4, 1)) - 1  #random weight values to start with
+        self.input_layer_weights = 2*np.random.random((5, 1)) - 1  #random weight values to start with
         self.learning_rate = 0.01       #I chose a small learning rate because it provided the best results
+        self.bias = 1
 
     def organizeData(self, inputFile):  #This is a function to read in a file, put all the data into a useable input and output array
 
@@ -28,12 +29,12 @@ class Perceptron():                     #Creating the perceptron class
                 i[4] = 2
         
         outputs = [i[4] for i in lines]         #fillin only the last index of all read in lines to create the output array
-
+        for i in lines:                         #fill in the finale slot of all inputs with the bias
+            i[4] = self.bias
+        
         training_inputs = np.array(lines).astype(float)          #convert input and output lists into numpy arrays as float types
         training_outputs = np.array(outputs).T.astype(float)
-
-        training_inputs = np.delete(training_inputs, 4, 1)  #remove the output from the input array
-
+        print(training_inputs)
         return training_inputs, training_outputs        #return useable arrays
 
 
@@ -85,7 +86,7 @@ if __name__ == "__main__":
     print(perceptron.input_layer_weights)
     
     training_inputs, training_outputs = perceptron.organizeData("iris_train.txt")
-
+    
     perceptron.train(training_inputs, training_outputs, 10) #train the perceptron
     
     print("Synaptic weights post training: ")   #print finale weights for monitroing purposes
@@ -108,3 +109,7 @@ if __name__ == "__main__":
     
     print("Correct: "+str(correct))                 
     print("Incorrect: "+str(incorrect))
+
+
+
+
