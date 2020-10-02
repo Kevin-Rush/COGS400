@@ -9,11 +9,10 @@ This is my iris perceptron for assignment 1 in COGS 400 2020
 import numpy as np
 import matplotlib.pyplot as plt
 
-class Perceptron():
+class Perceptron():                     #Creating the perceptron class
 
     def __init__(self):        
         self.synaptic_weights = 2*np.random.random((4, 1)) - 1
-        self.hidden_synaptic_weights = 2*np.random.random((4, 1)) - 1
         self.learning_rate = 0.01
 
     def organizeData(self, inputFile):
