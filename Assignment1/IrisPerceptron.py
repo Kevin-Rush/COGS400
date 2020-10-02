@@ -3,7 +3,7 @@ Kevin Rush
 10052650
 11kr28
 
-This is my iris perceptron for assignment 1 in COGS 400 2020
+This is my iris perceptron for assignment 1 Part A (No Pocket) in COGS 400 2020
 """
 
 import numpy as np
@@ -80,7 +80,16 @@ class Perceptron():                     #Creating the perceptron class
         plt.show()
     """
     def think(self, inputs):
-        return self.dotProduct(inputs)    #use the dot product to calculate our guess
+        output = self.dotProduct(inputs)    #use the dot product to calculate our guess
+
+        if output < 0.5:                    #if the output is less than 0.5, then I commit guess to being setosa
+            guess = 0
+        elif 0.5 < output and output < 1.5: #if the output is greater than 0.5 but less than 1.5, then I commit guess to being versicolor
+            guess = 1
+        else:
+            guess = 2                        #if the output is greater than 1.5, then I commit guess to being virginica
+ 
+        return guess
 
 
 if __name__ == "__main__":
@@ -107,18 +116,9 @@ if __name__ == "__main__":
     for i in range(len(testing_inputs)):                 #run through each line of the testing input and see if we guess correctly
         output = perceptron.think(testing_inputs[i])     #get output
 
-        if output < 0.5:                               #if the output is less than 0.5, then I commit guess to being setosa
-            guess = 0
-        elif 0.5 < output and output < 1.5:             #if the output is greater than 0.5 but less than 1.5, then I commit guess to being versicolor
-            guess = 1
-        else:
-            guess = 2                                   #if the output is greater than 1.5, then I commit guess to being virginica
-        
-        if guess == testing_outputs[i]:                 #Check if we were correct and track the predictions
-            print("Correct! - "+str(output))
+        if output == testing_outputs[i]:                 #Check if we were correct and track the predictions
             correct += 1
         else:
-            print("Incorrect - "+str(output))
             incorrect += 1
     
     print("Correct: "+str(correct))                 
