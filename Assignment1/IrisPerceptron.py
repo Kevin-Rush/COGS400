@@ -7,7 +7,6 @@ This is my iris perceptron for assignment 1 Part A (No Pocket) in COGS 400 2020
 """
 
 import numpy as np
-import matplotlib.pyplot as plt
 
 class Perceptron():                     #Creating the perceptron class
 
@@ -39,7 +38,7 @@ class Perceptron():                     #Creating the perceptron class
 
 
     def dotProduct(self, array):                    #calcualte the dot product of an array with the synaptic weights 
-        if len(array) != len(self.synaptic_weights):    #just a checkt to make sure the arrays are compatable 
+        if len(array) != len(self.synaptic_weights):    #just a check to make sure the arrays are compatable 
             print("Error in Dot Product!!!!")
             return -9999999999999
         else:
@@ -58,27 +57,13 @@ class Perceptron():                     #Creating the perceptron class
 
 
     def train(self, training_inputs, training_outputs, iterations): #train our data!
-        x = []          #just some variables to help graph the error
-        y = []
-        j = 0
+
         for k in range(iterations):                         #iterate through the data multiple times for training
             for i in range(len(training_inputs)):           #run through each line of the training input individually
                 output = self.dotProduct(training_inputs[i])     #get an output from our think function
                 error = training_outputs[i] - output        #calculate the error
-                y.append(error)                             
                 self.adjust(error, training_inputs[i])      #adjust weights accordingly
-                x.append(j)
 
-    """
-        plt.plot(x, y)          #error graphing code
-
-        plt.xlabel('Time')
-        plt.ylabel('Error')
-
-        plt.title('Error Over Time')
-
-        plt.show()
-    """
     def think(self, inputs):
         output = self.dotProduct(inputs)    #use the dot product to calculate our guess
 
