@@ -11,10 +11,14 @@ import numpy as np
 class Perceptron():                     #Creating the perceptron class
 
     def __init__(self):                 #initialize perceptron properties, synaptic weights  and the learning rate
-        self.synaptic_weights = 2*np.random.random((4, 1)) - 1  #random weight values to start with
+        self.synaptic_weights = 2*np.random.random((5, 1)) - 1  #random weight values to start with
         self.learning_rate = 0.01       #I chose a small learning rate because it provided the best results
-        self._pocket_synaptic_weights = np.array([self.synaptic_weights[0],self.synaptic_weights[1],
-                                            self.synaptic_weights[2],self.synaptic_weights[3],-99999], dtype=float) #pocket weights, initialized all to 0, final slot is for the number of successful runs
+        self.bias = 1
+        self.pocket_weights = self.synaptic_weights.copy()
+        self.best_run = -1
+        self.current_run = 0
+        self.total_incorrect = 0
+        self.total_correct = 0
 
     def organizeData(self, inputFile):  #This is a function to read in a file, put all the data into a useable input and output array
 
@@ -28,21 +32,20 @@ class Perceptron():                     #Creating the perceptron class
                 i[4] = 1
             else:
                 i[4] = 2
-        
+        np.random.shuffle(lines)
         outputs = [i[4] for i in lines]         #fillin only the last index of all read in lines to create the output array
-
+        for i in lines:                         #fill in the finale slot of all inputs with the bias
+            i[4] = self.bias
+        
         training_inputs = np.array(lines).astype(float)          #convert input and output lists into numpy arrays as float types
         training_outputs = np.array(outputs).T.astype(float)
-
-        training_inputs = np.delete(training_inputs, 4, 1)  #remove the output from the input array
-
         return training_inputs, training_outputs        #return useable arrays
 
 
     def dotProduct(self, array):                    #calcualte the dot product of an array with the synaptic weights 
         if len(array) != len(self.synaptic_weights):    #just a check to make sure the arrays are compatable 
             print("Error in Dot Product!!!!")
-            return -99999
+            return -9999999999999
         else:
             dot = 0
             for i in range(len(array)):
@@ -59,37 +62,39 @@ class Perceptron():                     #Creating the perceptron class
 
 
     def train(self, training_inputs, training_outputs, iterations): #train our data!
-        this_run = 0
 
         for k in range(iterations):                         #iterate through the data multiple times for training
             for i in range(len(training_inputs)):           #run through each line of the training input individually
-                output = self.dotProduct(training_inputs[i])     #get an output from our think function
-                error = training_outputs[i] - output        #calculate the error
+                output = np.dot(training_inputs[i], self.synaptic_weights)     #get an output from our think function
 
-                if -0.5 <= error and error <= 0.4:
-                    print("hi:")
+                if output < 0.5:                    #if the output is less than 0.5, then I commit guess to being setosa
+                    guess = 0
+                elif 0.5 < output and output < 1.5: #if the output is greater than 0.5 but less than 1.5, then I commit guess to being versicolor
+                    guess = 1
+                else:
+                    guess = 2 
+                
+                if guess == training_outputs[i]:                 #Check if we were correct and track the predictions
+                    self.total_correct += 1
+                    self.current_run += 1
+                    if self.current_run > self.best_run:
+                        self.best_run = self.current_run
+                        self.pocket_weights = self.synaptic_weights.copy()
+                else:
+                    self.total_incorrect += 1
+                    self.current_run = 0
+                
+                error = training_outputs[i] - output        #calculate the error
+                self.adjust(error, training_inputs[i])      #adjust weights accordingly
+            self.synaptic_weights = self.pocket_weights.copy()
                     
-                    this_run += 1
-                    if this_run > self._pocket_synaptic_weights[4]:
-                        print("ho")
-                        for i in range(4):
-                            print("Pre")
-                            print(self._pocket_synaptic_weights)
-                            print(self.synaptic_weights)
-                            self._pocket_synaptic_weights[i] = self.synaptic_weights[i]
-                            print("post")
-                            print(self._pocket_synaptic_weights)
-                            print(self.synaptic_weights)
-                        self._pocket_synaptic_weights[4] = this_run                    
-                    else:
-                        self.adjust(error, training_inputs[i])      #adjust weights accordingly
-                        this_run = 0
-                        
-            for i in range(4):
-                self.synaptic_weights[i] = self._pocket_synaptic_weights[i]
+                
+
+                
+
 
     def think(self, inputs):
-        output = self.dotProduct(inputs)    #use the dot product to calculate our guess
+        output = np.dot(inputs, self.synaptic_weights)    #use the dot product to calculate our guess
 
         if output < 0.5:                    #if the output is less than 0.5, then I commit guess to being setosa
             guess = 0
@@ -105,15 +110,19 @@ if __name__ == "__main__":
 
     perceptron = Perceptron()                   #create Perceptron object
     
-    #print("Random synaptic weights: ")          #print initial weights for monitoring purposes
-    #print(perceptron.synaptic_weights)
+    print("Random synaptic weights: ")          #print initial weights for monitoring purposes
+    print(perceptron.synaptic_weights)
     
     training_inputs, training_outputs = perceptron.organizeData("iris_train.txt")
-
-    perceptron.train(training_inputs, training_outputs, 10) #train the perceptron
+    perceptron.train(training_inputs, training_outputs, 10) #train the perceptron, runs through the data 100 times
     
-    #print("Synaptic weights post training: ")   #print finale weights for monitroing purposes
-    #print(perceptron.synaptic_weights)
+    print("Synaptic weights post training: ")   #print finale weights for monitroing purposes
+    print(perceptron.synaptic_weights)
+
+    print(perceptron.total_correct)
+    print(perceptron.total_incorrect)
+    print(perceptron.best_run)
+
 
     print("Time to Guess!")
 
@@ -132,4 +141,6 @@ if __name__ == "__main__":
     
     print("Correct: "+str(correct))                 
     print("Incorrect: "+str(incorrect))
-    
+
+
+
