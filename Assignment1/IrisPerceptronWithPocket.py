@@ -11,20 +11,24 @@ import numpy as np
 class Perceptron():                     #Creating the perceptron class
 
     def __init__(self):                 #initialize perceptron properties, synaptic weights  and the learning rate
-        self.synaptic_weights = 2*np.random.random((5, 1)) - 1  #random weight values to start with
+        self.synaptic_weights = np.array([[-0.22737348], [-0.10641548], [0.2631322], [0.76722179], [0.74099371]])
         self.learning_rate = 0.01       #I chose a small learning rate because it provided the best results
         self.bias = 1
         self.predictions = []
         self.actual_output = []
 
-        self.pocket_weights = self.synaptic_weights.copy()
+        self.pocket_weights = self.synaptic_weights.copy()  #these are properties required for the pocket algorithm 
         self.best_run = -1
         self.current_run = 0
         self.total_incorrect = 0
         self.total_correct = 0
 
     def organizeData(self, inputFile):  #This is a function to read in a file, put all the data into a useable input and output array
-
+        """
+        takes an input file that contains the input data with their respective flower type
+        the one parameter is a string for the file name
+        returns two np.arrays, the required input and transposed output
+        """
         with open(inputFile) as f:           #read in the Data
             lines = [line.split(",") for line in f]
 
@@ -47,6 +51,11 @@ class Perceptron():                     #Creating the perceptron class
                         
     
     def adjust(self, error, input):             #adjusts the weights of the synaptic weight
+        """
+        takes in two variables, the error calculated during training (float) and the input vector (np.array)
+        based on the parameters the function edits the synaptic weights in place
+        returns nothing
+        """
         lower = 1                           #if the guess was "lower" than the actual output then the error should be positive
         if error < 0:                       
             lower = -1                      #if the guess was higher than the actual output then the error should be negative
@@ -55,7 +64,11 @@ class Perceptron():                     #Creating the perceptron class
             self.synaptic_weights[i] += lower*self.learning_rate*input[i]   #update all the weights
 
     def confusion_matrix_gen(self, preds, correct_output):
-        
+        """
+        takes in two lists, the predictions and the correct outputs
+        generates the confusion matrix
+        returns the matrix in a 2D array
+        """
         setosa_matrix = np.array([0,0,0])      # [TP, FP, FP] for setosa
         versicolor_matrix  = np.array([0,0,0]) #[FP, TP, FP] for versicolor
         virginica_matrix = np.array([0,0,0])    #[FP, FP, TP] for virginica
@@ -109,7 +122,14 @@ class Perceptron():                     #Creating the perceptron class
         return con_matrix
 
     def train(self, training_inputs, training_outputs, iterations): #train our data!
+        """
+        takes in three parameters, training_inputs, training_outputs, iterations
+        training_inputs and training_outputs are two np.arrays containing the data to be tested against
+        iterations is an integer that dictates the number of times the perceptron is tested against the data
+        returns nothing
 
+        This function uses the pocket alrgorithm to influence the weights over the many iterations over the data
+        """
         for k in range(iterations):                         #iterate through the data multiple times for training
             for i in range(len(training_inputs)):           #run through each line of the training input individually
                 output = float(np.dot(training_inputs[i], self.synaptic_weights))     #get an output from our think function
@@ -120,9 +140,9 @@ class Perceptron():                     #Creating the perceptron class
                     guess = 1
                 else:
                     guess = 2 
-                
+                #pocket alrogirthm 
                 if guess == training_outputs[i]:                 #Check if we were correct and track the predictions
-                    self.total_correct += 1
+                    self.total_correct += 1            
                     self.current_run += 1
                     if self.current_run > self.best_run:
                         self.best_run = self.current_run
@@ -144,6 +164,11 @@ class Perceptron():                     #Creating the perceptron class
             print(con_matrix[i])
 
     def think(self, inputs):
+        """
+        to be used by the user
+        this function takes in an np.array and returns the classification of flower guess as an integer
+        0 for setosa, 1 for versicolor, and 2 for virginica
+        """
         output = np.dot(inputs, self.synaptic_weights)    #use the dot product to calculate our guess
         if output < 0.5:                    #if the output is less than 0.5, then I commit guess to being setosa
             guess = 0

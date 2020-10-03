@@ -11,14 +11,24 @@ import numpy as np
 class Perceptron():                     #Creating the perceptron class
 
     def __init__(self):                 #initialize perceptron properties, synaptic weights  and the learning rate
-        self.synaptic_weights = 2*np.random.random((5, 1)) - 1  #random weight values to start with
+
+        self.synaptic_weights = np.array([[0.16761088],
+                                          [-0.11179888],
+                                          [ 0.0886204 ],
+                                          [ 0.72547367],
+                                          [-0.71691523]])  #start weight values to start with
         self.learning_rate = 0.01       #I chose a small learning rate because it provided the best results
-        self.bias = 1
-        self.predictions = []
-        self.actual_output = []
-
-    def organizeData(self, inputFile):  #This is a function to read in a file, put all the data into a useable input and output array
-
+        self.bias = 1                      #initlaizeing bias
+        self.predictions = []           #recording overall predictions and actual output for confusion matrix during training
+        self.actual_output = []         #these were required because I randomized my data every time to avoid issues due to
+                                        #the test data being organized 
+    
+    def organizeData(self, inputFile):  #This is a function to read in a file, put all the data into a useable input and output np arrays
+        """
+        takes an input file that contains the input data with their respective flower type
+        the one parameter is a string for the file name
+        returns two np.arrays, the required input and transposed output
+        """
         with open(inputFile) as f:           #read in the Data
             lines = [line.split(",") for line in f]
 
@@ -29,7 +39,7 @@ class Perceptron():                     #Creating the perceptron class
                 i[4] = 1
             else:
                 i[4] = 2
-        np.random.shuffle(lines)
+        np.random.shuffle(lines)            #shuffle the data to avoid oddities in testing due to sorted input file
         outputs = [i[4] for i in lines]         #fillin only the last index of all read in lines to create the output array
         for i in lines:                         #fill in the finale slot of all inputs with the bias
             i[4] = self.bias
@@ -40,6 +50,11 @@ class Perceptron():                     #Creating the perceptron class
         return training_inputs, training_outputs        #return useable arrays                         
     
     def adjust(self, error, input):             #adjusts the weights of the synaptic weight
+        """
+        takes in two variables, the error calculated during training (float) and the input vector (np.array)
+        based on the parameters the function edits the synaptic weights in place
+        returns nothing
+        """
         lower = 1                           #if the guess was "lower" than the actual output then the error should be positive
         if error < 0:                       
             lower = -1                      #if the guess was higher than the actual output then the error should be negative
@@ -48,6 +63,11 @@ class Perceptron():                     #Creating the perceptron class
             self.synaptic_weights[i] += lower*self.learning_rate*input[i]   #update all the weights
     
     def confusion_matrix_gen(self, preds, correct_output):
+        """
+        takes in two lists, the predictions and the correct outputs
+        generates the confusion matrix
+        returns the matrix in a 2D array
+        """
         
         setosa_matrix = np.array([0,0,0])      # [TP, FP, FP] for setosa
         versicolor_matrix  = np.array([0,0,0]) #[FP, TP, FP] for versicolor
@@ -75,35 +95,36 @@ class Perceptron():                     #Creating the perceptron class
                 else:
                     virginica_matrix[2] += 1
 
-        setosa_TN = versicolor_matrix[1] + virginica_matrix[2]
-        versicolor_TN = setosa_matrix[0] + virginica_matrix[2]
-        virginica_TN = setosa_matrix[0] + virginica_matrix[1]
-
-        setosa_FP = setosa_matrix[1] + setosa_matrix[2]
-        versicolor_FP = versicolor_matrix[0] + versicolor_matrix[2]
-        virginica_FP = virginica_matrix[0] + virginica_matrix[1]
+        setosa_FP = setosa_matrix[1] + setosa_matrix[2]             #After processing the two lists of predictions and actual results
+        versicolor_FP = versicolor_matrix[0] + versicolor_matrix[2] #organize what is the FP, FN for each type of flower
+        virginica_FP = virginica_matrix[0] + virginica_matrix[1]    #this is all used to then create the confusion function below
 
         setosa_FN = versicolor_matrix[0] + virginica_matrix[0]
         versicolor_FN = setosa_matrix[1] + virginica_matrix[1]
         virginica_FN = setosa_matrix[2] + versicolor_matrix[2]
 
-        total_cases = 0
+        total_cases = 0                                             #needed for accuracy
         for i in range(3):
             total_cases += setosa_matrix[i]
             total_cases += versicolor_matrix[i]
             total_cases += virginica_matrix[i]
         
-        accuracy = setosa_matrix[0] + versicolor_matrix[1] + virginica_matrix[2]
-
+        accuracy = setosa_matrix[0] + versicolor_matrix[1] + virginica_matrix[2]    #calculate accuracy
+                                                                                    #creat matrix with data retrieved above
         con_matrix =  [[setosa_matrix[0],setosa_matrix[1],setosa_matrix[2],setosa_matrix[0]/(setosa_FP + setosa_matrix[0])],
                        [versicolor_matrix[0],versicolor_matrix[1],versicolor_matrix[2],versicolor_matrix[1]/(versicolor_FP + versicolor_matrix[1])], 
                        [virginica_matrix[0],virginica_matrix[1],virginica_matrix[2],virginica_matrix[2]/(virginica_FP +  virginica_matrix[2])],
                        [setosa_matrix[0]/(setosa_FN + setosa_matrix[0]),versicolor_matrix[1]/(versicolor_FN + versicolor_matrix[1]),virginica_matrix[2]/(virginica_FN + virginica_matrix[2]), accuracy/total_cases]]
 
-        return con_matrix
+        return con_matrix       #return matrix
 
     def train(self, training_inputs, training_outputs, iterations): #train our data!
-        
+        """
+        takes in three parameters, training_inputs, training_outputs, iterations
+        training_inputs and training_outputs are two np.arrays containing the data to be tested against
+        iterations is an integer that dictates the number of times the perceptron is tested against the data
+        returns nothing
+        """
         for k in range(iterations):                         #iterate through the data multiple times for training
             for i in range(len(training_inputs)):           #run through each line of the training input individually
                 output = float(np.dot(training_inputs[i], self.synaptic_weights))    #generate an output
@@ -125,6 +146,11 @@ class Perceptron():                     #Creating the perceptron class
             print(con_matrix[i])
             
     def think(self, inputs):
+        """
+        to be used by the user
+        this function takes in an np.array and returns the classification of flower guess as an integer
+        0 for setosa, 1 for versicolor, and 2 for virginica
+        """
         output = np.dot(inputs, self.synaptic_weights)    #use the dot product to calculate our guess
         if output < 0.5:                    #if the output is less than 0.5, then I commit guess to being setosa
             guess = 0
@@ -136,7 +162,7 @@ class Perceptron():                     #Creating the perceptron class
         return guess
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":      #main function to run program and generate output for display purposes
 
     perceptron = Perceptron()                   #create Perceptron object
     
