@@ -39,7 +39,7 @@ class BackpropNN():
     def prediction(self, array):
         largest = -1
         index = -1
-        for i in range(array):
+        for i in range(len(array)):
             if largest < array[i]:
                 largest = array[i]
                 index = i
@@ -54,26 +54,26 @@ class BackpropNN():
         the output layer then takes sum of c*x[i][j]*w[i][j] and outputs the sigmoid as well
         then I just take the largest value's index and that's the guess
         """
-        self.z = np.dot(X, self.weights_input_hidden)           #dot product of input matrix and first set of weights, returns 784x7 matrix
-        print(self.z)
+        self.z = np.dot(X.T, self.weights_input_hidden)           #dot product of input matrix and first set of weights, returns 784x7 matrix
         self.z2 = self.sigmoid(self.z)                          #activation function, returns the z matrix through the sigmoid function
         self.z3 = np.dot(self.z2, self.weights_hidden_output)   #dot product of hidden layer (z2) and second set of weights, returns 784x10 matrix
-        print(self.z3.shape)
         output = self.sigmoid(self.z3)
         #self.system_check()    
-        return output
+        return self.prediction(output.T)
 
     def backpropogation(self, X, y, output):                                    #backward propogate through the network
         
-        self.output_error = y - output                                          #error in output
+        #delta_w = c(yj - outputj)*outputj*(1-outputj)*xh
+
+        output_error = (y - output)                                          #error in output
+        output_delta = self.learning_rate*output_error*self.sigmoid_derivaitve(output)*self.z3 #how do I get xh???
+                
+        z2_error = output_delta.dot(self.weights_hidden_output.T)      #z2_error: how much hidden layer weights contribute to output error
+        z2_delta = self.learning_rate*z2_error*self.sigmoid_derivaitve(self.z2)*self.z          #applying the derivative of sigmoid to z2 error
         
-        self.output_delta = self.output_error*self.sigmoid_derivaitve(output)
+        self.weights_input_hidden += X.dot(z2_delta)                     #adjusting first set (input --> hidden) weights
+        self.weights_hidden_output += self.z2.T.dot(output_delta)          #ajdusting the second set (hidden --> output) weights
         
-        self.z2_error= self.output_delta.dot(self.weights_hidden_output.T)      #z2_error: how much hidden layer weights contribute to output error
-        self.z2_delta = self.z2_error*self.sigmoid_derivaitve(self.z2)          #applying the derivative of sigmoid to z2 error
-        
-        self.weights_input_hidden += X.T.dot(self.z2_delta)                     #adjusting first set (input --> hidden) weights
-        self.weights_hidden_output += self.z2.T.dot(self.output_delta)          #ajdusting the second set (hidden --> output) weights
 
     def train(self, X, y):
         
@@ -81,14 +81,9 @@ class BackpropNN():
             for i in range(len(X)):
                 image = X[i].reshape(784,1)
                 #print(image)
-                print("hi")
                 output = self.feedforward(image)             #sending one 28x28 matrix that represents an image
                 
-                self.backpropogation(image, y[i], output)    #y is a single digit 
-                print("Done 1 round")
-                exit()
-            
-        
+                self.backpropogation(image, y[i], output)    #y is a single digit               
 
 
 if __name__ == "__main__":      #main function to run program and generate output for display purposes
@@ -96,7 +91,24 @@ if __name__ == "__main__":      #main function to run program and generate outpu
 
     (train_X, train_y), (test_X, test_y) = tf.keras.datasets.mnist.load_data() #returns an array of 28 x 28 images
 
+    """
+    print("original input hidden weights")
+    for i in range(len(NN.weights_input_hidden)):
+        print(NN.weights_input_hidden[i])
+    print("original hidden output weights")
+    print(NN.weights_hidden_output)
+    """
     NN.train(train_X, train_y)
+    """
+    print("new input hidden weights")
+    for i in range(len(NN.weights_input_hidden)):
+        print(NN.weights_input_hidden[i])
+    print("new hidden output weights")
+    print(NN.weights_hidden_output)
+"""
+    for i in range(10):
+        print("Prediction: "+str(NN.feedforward(test_X[i].reshape(784,1))))
+        print("Actual: "+str(test_y[i]))
 
     """
                                                 #X is a 6000x28x28
