@@ -13,9 +13,9 @@ class BackpropNN():
     def __init__(self): #file_input_hidden, file_hidden_output):
         #parameters
         self.input_size = 784
-        self.hidden_size = 15
+        self.hidden_size = 25
         self.output_size = 10
-        self.learning_rate = 0.5
+        self.learning_rate = 0.75
         self.a = 0.05
         self.bias = 1
         self.matrix = np.zeros((10, 10))
@@ -102,10 +102,10 @@ class BackpropNN():
         output_sig_der = self.sigmoid_derivaitve(output)
         output_change = self.learning_rate*self.output_error*output_sig_der
         
-        output_delta = np.outer(output_change, self.z2)                
-        delta_sum = np.sum(self.output_error*output_sig_der*self.weights_hidden_output)
+        output_delta = np.outer(output_change, self.z2) 
+        delta_error_sum = np.sum(self.output_error*output_sig_der*self.weights_hidden_output)
         
-        z2_change = self.learning_rate*delta_sum*self.sigmoid_derivaitve(self.z2)             #applying the derivative of sigmoid to z2 error
+        z2_change = self.learning_rate*delta_error_sum*self.sigmoid_derivaitve(self.z2)             #Multiplying learning rate, with delta_error_sum and the sigmoid derivative of z2
         z2_delta = np.outer(z2_change, X)
 
         self.weights_hidden_output += output_delta.T + self.a*self.weights_hidden_output_last_weight_change  #ajdusting the second set (hidden --> output) weights
@@ -120,7 +120,7 @@ class BackpropNN():
         print("output sig der: " +str(output_sig_der))        
         print("output delta: "+str(output_delta))
         print("-------------------------------------------------------------------")
-        print("sum_delta: "+str(delta_sum))
+        print("sum_delta: "+str(delta_error_sum))
         print("sig_der_z2: "+str(self.sigmoid_derivaitve(self.z2)))
         print("z2 delta"+str(z2_delta))
         print("-------------------------------------------------------------------")
@@ -144,7 +144,7 @@ class BackpropNN():
             array[i][y[i]] = 1
 
         j = 0
-        while (j < 10) and (self.MSE > 0.05):
+        while (j < 5) and (self.MSE > 0.05):
         #for j in range(5):                                  #iteratior
             for i in range(len(X)):
                 image = X[i].reshape(784,1)
