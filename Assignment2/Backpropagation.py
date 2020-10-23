@@ -101,11 +101,22 @@ class BackpropNN():
         self.output_error = (y-output)
         output_sig_der = self.sigmoid_derivaitve(output)
         output_change = self.learning_rate*self.output_error*output_sig_der
-        
         output_delta = np.outer(output_change, self.z2) 
-        delta_error_sum = np.sum(self.output_error*output_sig_der*self.weights_hidden_output)
         
-        z2_change = self.learning_rate*delta_error_sum*self.sigmoid_derivaitve(self.z2)             #Multiplying learning rate, with delta_error_sum and the sigmoid derivative of z2
+
+        error_matrix = self.output_error*output_sig_der*self.weights_hidden_output
+        delta_error_sum_matrix = np.zeros((len(error_matrix)))
+        for i in range(len(error_matrix)):
+            delta_error_sum_matrix[i] = np.sum(error_matrix[i])
+        """
+        print(delta_error_sum_matrix)   
+        print(delta_error_sum_matrix)
+        print(delta_error_sum_matrix.shape)
+        print("Old:")
+        print(np.sum(error_matrix))
+        exit()
+        """
+        z2_change = self.learning_rate*delta_error_sum_matrix*self.sigmoid_derivaitve(self.z2)             #Multiplying learning rate, with delta_error_sum and the sigmoid derivative of z2
         z2_delta = np.outer(z2_change, X)
 
         self.weights_hidden_output += output_delta.T + self.a*self.weights_hidden_output_last_weight_change  #ajdusting the second set (hidden --> output) weights
@@ -182,9 +193,18 @@ class BackpropNN():
 
 if __name__ == "__main__":      #main function to run program and generate output for display purposes
     
-    f_hidden_output = "hidden_output_weights.txt"
-    f_input_hidden = "input_hidden_weights.txt"
-    
+    f_hidden_output = "C:/Users/Kevin/Documents/My University/Queen's/Courses/CISC_COGS/COGS 400/COGS400/Assignment2/hidden_output_weights.txt"
+    f_input_hidden = "C:/Users/Kevin/Documents/My University/Queen's/Courses/CISC_COGS/COGS 400/COGS400/Assignment2/input_hidden_weights.txt"
+
+    """
+    T = []
+    with open(f_hidden_output, "r") as file1:
+        for line in file1.readlines():
+            f_list = [float(i) for i in line.split("]") if i.strip()]
+            T += f_list[7:11]
+    print(T)
+    exit()
+    """
     NN = BackpropNN()
 
     (train_X, train_y), (test_X, test_y) = tf.keras.datasets.mnist.load_data() #returns an array of 28 x 28 images
@@ -205,6 +225,20 @@ if __name__ == "__main__":      #main function to run program and generate outpu
     print()
     for i in range(len(NN.weights_hidden_output)):
         print(NN.weights_hidden_output[i])
+    
+    f_IH = open(f_input_hidden, "w")
+    f_HO = open(f_hidden_output, "w")
+
+    a_file = open("test.txt", "w")
+for row in an_array:
+    np.savetxt(a_file, row)
+
+    f_IH.write("NN.weights_input_hidden")
+    f_HO.write("NN.weights_hidden_output")
+    f_IH.write(str(NN.weights_input_hidden))    
+    f_HO.write(str(NN.weights_hidden_output))
+    f_HO.close()
+    f_IH.close()
     """
     print(NN.test(test_X, test_y))
     #print(NN.matrix)
