@@ -13,15 +13,15 @@ class BackpropNN():
     def __init__(self): #file_input_hidden, file_hidden_output):
         #parameters
         self.input_size = 784
-        self.hidden_size = 25
+        self.hidden_size = 15
         self.output_size = 10
         self.learning_rate = 0.5
-        self.a = 0.05
+        self.alpha = 0.05
         self.bias = 1
         self.matrix = np.zeros((10, 10))
         self.count = 0
         self.MSE = 9999
-        self.avrg_MSE = 0
+        self.alphavrg_MSE = 0
         self.iterations = 5
 
         self.weights_input_hidden_last_weight_change = np.zeros((self.input_size+1,self.hidden_size), dtype=float)
@@ -67,7 +67,7 @@ class BackpropNN():
             actual_mse += mse[i]
         
         self.MSE = actual_mse/len(mse)
-        self.avrg_MSE = (self.avrg_MSE+self.MSE)/self.count 
+        self.alphavrg_MSE = (self.alphavrg_MSE+self.MSE)/self.count 
 
     def feedforward (self, X):                                  
         
@@ -94,11 +94,11 @@ class BackpropNN():
         errors_multiplied = error_matrix*hidden_sig_der
         z2_delta = np.outer(errors_multiplied, X)
 
-        self.weights_hidden_output += self.learning_rate*output_delta.T + self.a*self.weights_hidden_output_last_weight_change  
-        self.weights_input_hidden += self.learning_rate*z2_delta.T + self.a*self.weights_input_hidden_last_weight_change
+        self.weights_hidden_output += self.learning_rate*output_delta.T + self.alpha*self.weights_hidden_output_last_weight_change  
+        self.weights_input_hidden += self.learning_rate*z2_delta.T + self.alpha*self.weights_input_hidden_last_weight_change
 
-        self.weights_hidden_output_last_weight_change = output_delta.T + self.a*self.weights_hidden_output_last_weight_change
-        self.weights_input_hidden_last_weight_change = z2_delta.T + self.a*self.weights_input_hidden_last_weight_change  
+        self.weights_hidden_output_last_weight_change = output_delta.T + self.alpha*self.weights_hidden_output_last_weight_change
+        self.weights_input_hidden_last_weight_change = z2_delta.T + self.alpha*self.weights_input_hidden_last_weight_change  
 
     def train(self, X, y):
         array = np.zeros((len(y), self.output_size))
@@ -106,7 +106,7 @@ class BackpropNN():
             array[i][y[i]] = 1
 
         j = 0
-        for j in range(self.iterations)                                  #iterator
+        for j in range(self.iterations):                                #iterator
             for i in range(len(X)):
                 image = X[i].reshape(self.input_size,1)
                 image = np.append(image, [[self.bias]])
@@ -144,8 +144,8 @@ if __name__ == "__main__":      #main function to run program and generate outpu
 
     (train_X, train_y), (test_X, test_y) = tf.keras.datasets.mnist.load_data() #returns an array of 28 x 28 images
     
-    train_X = tf.keras.utils.normalize(train_X, axis=1)
-    test_X = tf.keras.utils.normalize(test_X, axis=1)
+    train_X = train_X/255 #tf.keras.utils.normalize(train_X, axis=1)
+    test_X = test_X/255 #tf.keras.utils.normalize(test_X, axis=1)
     
     tempIH = NN.weights_input_hidden.copy()
     tempHO = NN.weights_hidden_output.copy()
