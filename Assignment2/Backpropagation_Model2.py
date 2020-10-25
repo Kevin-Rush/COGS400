@@ -1,10 +1,8 @@
 import numpy as np
 import tensorflow as tf
-#import mnist 
-#import matplotlib.plyplot as plt
-from keras.models import Sequential
-from keras.layers import Dense
-from keras.utils import to_categorical
+#from keras.models import Sequential
+#from keras.layers import Dense
+#from keras.utils import to_categorical
 
 (train_X, train_y), (test_X, test_y) = tf.keras.datasets.mnist.load_data() #returns an array of 28 x 28 images
 
@@ -18,17 +16,16 @@ input_size = 784
 hidden_size = 25 
 output_size = 10
 
-NN = Sequential()
-NN.add(Dense(hidden_size, activation="sigmoid", input_dim=input_size))
-NN.add(Dense(output_size, activation="sigmoid"))
+NN = tf.keras.models.Sequential()
+NN.add(tf.keras.layers.Dense(hidden_size, activation="sigmoid", input_dim=input_size))
+NN.add(tf.keras.layers.Dense(output_size, activation="sigmoid"))
 
 NN.compile(optimizer="adam", loss="mean_squared_error", metrics=["accuracy"])
-NN.fit(train_X, to_categorical(train_y), epochs = 10)
+NN.fit(train_X, tf.keras.utils.to_categorical(train_y), epochs = 10)
 
-NN.fit(test_X, to_categorical(test_y), epochs = 1)
+NN.fit(test_X, tf.keras.utils.to_categorical(test_y), epochs = 1)
 
-predictions = NN.predict(test_y[:5])
-print(predictions)
+
 """
 loss, accuracy = NN.evaluate(test_X, test_y)
 
